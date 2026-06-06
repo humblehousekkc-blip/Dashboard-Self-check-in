@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humble House — Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F5F0EA;--card:#FFFDFB;--primary:#656843;--primary-light:#ECEEE0;
+  --accent:#A95F44;--accent-light:#F5EAE4;--sand:#DEC2A5;--sand-light:#F7F0E8;
+  --text:#2C2820;--text-muted:#937F73;--border:#E8DDD3;
+  --radius:12px;--shadow:0 2px 24px rgba(101,104,67,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* Layout */
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:220px;background:var(--primary);color:white;padding:0;display:flex;flex-direction:column;flex-shrink:0;position:fixed;height:100vh;overflow-y:auto;z-index:10;}
+.main{flex:1;margin-left:220px;padding:28px 28px 60px;}
+
+/* Sidebar */
+.sb-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sb-logo{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;letter-spacing:1px;margin-bottom:2px;}
+.sb-sub{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;opacity:.45;}
+.sb-nav{padding:12px 0;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;font-size:13px;cursor:pointer;transition:background .15s;opacity:.55;border-left:2px solid transparent;}
+.nav-item:hover{background:rgba(255,255,255,.06);opacity:.85;}
+.nav-item.active{background:rgba(255,255,255,.1);opacity:1;border-left-color:var(--sand);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--accent);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+
+/* Top bar */
+.topbar{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:24px;}
+.topbar h1{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;}
+.topbar-date{font-size:12px;color:var(--text-muted);}
+
+/* Stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;line-height:1;}
+.stat-num.orange{color:var(--accent);}
+.stat-num.green{color:var(--primary);}
+.stat-num.red{color:#B04040;}
+.stat-num.dark{color:var(--text);}
+
+/* Tabs */
+.tab-row{display:flex;gap:6px;margin-bottom:14px;}
+.tab{padding:7px 16px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--text-muted);transition:all .15s;font-family:'Sarabun',sans-serif;font-weight:500;}
+.tab:hover{border-color:var(--primary);color:var(--primary);}
+.tab.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+/* Table */
+.table-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--sand-light);}
+th{padding:12px 16px;text-align:left;font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);}
+td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#FDFAF6;}
+.booking-id{font-weight:700;color:var(--primary);font-family:monospace;font-size:12px;}
+.guest-name{font-weight:600;}
+.guest-sub{font-size:11px;color:var(--text-muted);margin-top:1px;}
+
+/* Status */
+.status{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap;}
+.status.pending{background:#FDF5E8;color:#9C6A2A;}
+.status.approved{background:var(--primary-light);color:var(--primary);}
+.status.rejected{background:#FDF0EE;color:#B04040;}
+
+/* Actions */
+.actions{display:flex;gap:6px;flex-wrap:wrap;}
+.btn-sm{padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'Sarabun',sans-serif;transition:all .15s;white-space:nowrap;}
+.btn-view{background:var(--sand-light);color:var(--text-muted);border:1px solid var(--border);}
+.btn-view:hover{border-color:var(--primary);color:var(--primary);}
+.btn-approve{background:var(--primary-light);color:var(--primary);border:1px solid #c8caa0;}
+.btn-approve:hover{background:var(--primary);color:white;}
+.btn-reject{background:#FDF0EE;color:#B04040;border:1px solid #e8c0bb;}
+.btn-reject:hover{background:#B04040;color:white;}
+.btn-done{background:var(--sand-light);color:var(--text-muted);border:1px solid var(--border);cursor:default;}
+
+/* Modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(44,40,32,.4);z-index:100;align-items:center;justify-content:center;padding:20px;}
+.overlay.show{display:flex;}
+.modal{background:white;border-radius:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal-header{padding:22px 26px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:1;}
+.modal-header h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;}
+.modal-close{font-size:22px;cursor:pointer;color:var(--text-muted);line-height:1;}
+.modal-body{padding:22px 26px;}
+
+/* Modal detail */
+.detail-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.detail-row:last-child{border-bottom:none;}
+.dl{color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px;}
+.dv{font-weight:600;}
+.amount-highlight{background:var(--primary);color:white;border-radius:10px;padding:16px;text-align:center;margin:14px 0;}
+.amount-highlight .lbl{font-size:10px;opacity:.65;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.amount-highlight .num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;}
+.slip-link{display:inline-flex;align-items:center;gap:6px;color:var(--primary);font-size:12px;text-decoration:none;background:var(--primary-light);padding:6px 12px;border-radius:8px;font-weight:600;}
+.slip-link:hover{background:var(--primary);color:white;}
+
+/* Modal actions */
+.modal-actions{display:flex;gap:10px;margin-top:16px;}
+.btn-full{flex:1;padding:12px;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:'Sarabun',sans-serif;transition:all .15s;}
+.approve-full{background:var(--primary);color:white;}
+.approve-full:hover{background:#4e5133;}
+.reject-full{background:#FDF0EE;color:#B04040;border:1px solid #e8c0bb;}
+.reject-full:hover{background:#B04040;color:white;}
+
+/* Create link panel */
+.create-panel{background:var(--card);border-radius:var(--radius);padding:22px 24px;border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:24px;}
+.section-label{font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin:14px 0 10px;display:flex;align-items:center;gap:8px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:5px;}
+.field input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;background:var(--sand-light);color:var(--text);outline:none;transition:border .2s;}
+.field input:focus{border-color:var(--primary);background:white;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.amount-result{background:var(--primary-light);border:1px solid #c8caa0;border-radius:8px;padding:9px 12px;font-size:14px;font-weight:700;color:var(--primary);}
+.btn-gen{padding:11px 20px;border:none;border-radius:9px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;background:var(--primary);color:white;transition:all .2s;white-space:nowrap;}
+.btn-gen:hover{background:#4e5133;}
+.result-url-box{background:var(--primary-light);border:1px solid #c8caa0;border-radius:10px;padding:14px;margin-top:14px;display:none;}
+.result-url-box.show{display:block;}
+.result-url-text{font-size:11px;word-break:break-all;color:var(--text);background:white;padding:8px 10px;border-radius:7px;border:1px solid var(--border);margin-bottom:10px;line-height:1.7;}
+.copy-row{display:flex;gap:8px;}
+.btn-copy-url{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:'Sarabun',sans-serif;background:var(--primary);color:white;transition:all .15s;}
+.btn-copy-url.copied{background:#7a9e6a;}
+.btn-preview-url{flex:1;padding:8px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);font-family:'Sarabun',sans-serif;background:white;color:var(--text);transition:all .15s;text-decoration:none;display:flex;align-items:center;justify-content:center;}
+.btn-preview-url:hover{border-color:var(--primary);color:var(--primary);}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:white;padding:12px 18px;border-radius:10px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.15);transform:translateY(20px);opacity:0;transition:all .3s;z-index:200;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* Pages */
+.section{display:none;}
+.section.active{display:block;}
+
+/* Edit link modal */
+.edit-field{margin-bottom:10px;}
+.edit-field label{display:block;font-size:10px;font-weight:700;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px;}
+.edit-field input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Sarabun',sans-serif;background:var(--sand-light);color:var(--text);outline:none;}
+.edit-field input:focus{border-color:var(--primary);background:white;}
+
+@media(max-width:768px){
+  .sidebar{display:none;}
+  .main{margin-left:0;padding:16px;}
+  .stats{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="layout">
+<div class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">Humble House.</div>
+    <div class="sb-sub">Admin Dashboard</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-item active" onclick="showSection('bookings')"><span class="nav-icon">📋</span>รายการจอง<span class="nav-badge" id="pending-badge">0</span></div>
+    <div class="nav-item" onclick="showSection('create')"><span class="nav-icon">🔗</span>สร้าง Link</div>
+    <div class="nav-item" onclick="showSection('history')"><span class="nav-icon">🕐</span>Link ล่าสุด</div>
+  </nav>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div><h1>Admin Dashboard</h1><div class="topbar-date" id="today-date"></div></div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card"><div class="stat-label">รอตรวจสอบ</div><div class="stat-num orange" id="s-pending">0</div></div>
+    <div class="stat-card"><div class="stat-label">อนุมัติแล้ว</div><div class="stat-num green" id="s-approved">0</div></div>
+    <div class="stat-card"><div class="stat-label">ปฏิเสธ</div><div class="stat-num red" id="s-rejected">0</div></div>
+    <div class="stat-card"><div class="stat-label">รวมทั้งหมด</div><div class="stat-num dark" id="s-total">0</div></div>
+  </div>
+
+  <!-- SECTION: Bookings -->
+  <div class="section active" id="sec-bookings">
+    <div class="tab-row">
+      <button class="tab active" onclick="filterTable('all',this)">ทั้งหมด</button>
+      <button class="tab" onclick="filterTable('pending',this)">รอตรวจ</button>
+      <button class="tab" onclick="filterTable('approved',this)">อนุมัติแล้ว</button>
+      <button class="tab" onclick="filterTable('rejected',this)">ปฏิเสธ</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>รหัสจอง</th><th>ลูกค้า</th><th>วันเข้าพัก</th><th>ยอด (฿)</th><th>สถานะ</th><th>จัดการ</th>
+        </tr></thead>
+        <tbody id="booking-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION: Create Link -->
+  <div class="section" id="sec-create">
+    <div class="create-panel">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;margin-bottom:4px;">สร้าง Link Check-in</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">กรอกข้อมูลลูกค้าแล้วส่ง Link ทาง Line</div>
+
+      <div class="field"><label>URL หน้า Check-in</label>
+        <input type="text" id="base-url" value="https://humblehousekkc-blip.github.io/Self-check-in/">
+      </div>
+
+      <div class="section-label">ข้อมูลการจอง</div>
+      <div class="field-row">
+        <div class="field"><label>รหัสจอง</label><input type="text" id="c-id" placeholder="BK-2506001"></div>
+        <div class="field"><label>ห้องพัก</label><input type="text" id="c-room" placeholder="201"></div>
+      </div>
+      <div class="field"><label>ชื่อลูกค้า</label><input type="text" id="c-name" placeholder="ชื่อ-นามสกุล"></div>
+      <div class="field-row">
+        <div class="field"><label>วันเช็คอิน</label><input type="date" id="c-checkin"></div>
+        <div class="field"><label>วันเช็คเอาต์</label><input type="date" id="c-checkout"></div>
+      </div>
+
+      <div class="section-label">ยอดชำระ</div>
+      <div class="field-row">
+        <div class="field"><label>ยอดรวม (฿)</label><input type="number" id="c-total" placeholder="3000" oninput="calcAmt()"></div>
+        <div class="field"><label>มัดจำที่รับแล้ว (฿)</label><input type="number" id="c-deposit" placeholder="1500" oninput="calcAmt()"></div>
+      </div>
+      <div class="field"><label>ยอดคงเหลือ</label><div class="amount-result" id="c-amount-display">— บาท</div></div>
+
+      <div class="section-label">บัญชีรับโอน</div>
+      <div class="field"><label>ธนาคาร</label><input type="text" id="c-bank" value="ธ.กสิกรไทย"></div>
+      <div class="field-row">
+        <div class="field"><label>เลขบัญชี</label><input type="text" id="c-acc" placeholder="123-4-56789-0"></div>
+        <div class="field"><label>ชื่อบัญชี</label><input type="text" id="c-owner" placeholder="ชื่อเจ้าของบัญชี"></div>
+      </div>
+
+      <button class="btn-gen" onclick="generateLink()" style="margin-top:8px;width:100%">🔗 สร้าง Link Check-in</button>
+
+      <div class="result-url-box" id="result-box">
+        <div style="font-size:10px;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">✅ Link พร้อมส่งให้ลูกค้า</div>
+        <div class="result-url-text" id="result-url-text"></div>
+        <div class="copy-row">
+          <button class="btn-copy-url" id="btn-copy-url" onclick="copyGenLink()">📋 คัดลอก Link</button>
+          <a class="btn-preview-url" id="btn-preview-url" href="#" target="_blank">👁️ ดูตัวอย่าง</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: History -->
+  <div class="section" id="sec-history">
+    <div class="create-panel">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;margin-bottom:16px;">Link ล่าสุด</div>
+      <div id="history-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">ยังไม่มี Link ที่สร้าง</div></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- Modal: รายละเอียด -->
+<div class="overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modal-title">รายละเอียด</h3>
+      <span class="modal-close" onclick="closeModal()">×</span>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- Modal: แก้ไข Link -->
+<div class="overlay" id="edit-overlay" onclick="closeEdit(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3>แก้ไข Link</h3>
+      <span class="modal-close" onclick="closeEdit()">×</span>
+    </div>
+    <div class="modal-body" id="edit-body"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRj8dxhdivOGyPSrD_nMdAIhHLb0od5wCoM3uz2AauvjQ9hGLKVCBiTLPz9d4f_8Qv/exec';
+const BASE_CHECKIN_URL = 'https://humblehousekkc-blip.github.io/Self-check-in/';
+
+// ====== Local Storage Data ======
+let bookings = JSON.parse(localStorage.getItem('hh_bookings') || '[]');
+let links = JSON.parse(localStorage.getItem('hh_links') || '[]');
+let currentFilter = 'all';
+let currentAmt = 0;
+let genLink = '';
+let editIdx = -1;
+
+// ====== Init ======
+window.onload = () => {
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('th-TH', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  autoBookingId();
+  updateStats();
+  renderTable('all');
+  renderHistory();
+};
+
+function autoBookingId() {
+  const d = new Date();
+  const num = String(bookings.length + links.length + 1).padStart(3,'0');
+  document.getElementById('c-id').value = `BK-${d.getFullYear().toString().slice(2)}${String(d.getMonth()+1).padStart(2,'0')}${num}`;
+}
+
+// ====== Section nav ======
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+// ====== Stats ======
+function updateStats() {
+  const pending = bookings.filter(b => b.status === 'pending').length;
+  const approved = bookings.filter(b => b.status === 'approved').length;
+  const rejected = bookings.filter(b => b.status === 'rejected').length;
+  document.getElementById('s-pending').textContent = pending;
+  document.getElementById('s-approved').textContent = approved;
+  document.getElementById('s-rejected').textContent = rejected;
+  document.getElementById('s-total').textContent = bookings.length;
+  document.getElementById('pending-badge').textContent = pending;
+}
+
+// ====== Table ======
+function renderTable(filter) {
+  const tbody = document.getElementById('booking-table');
+  const list = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px;">ยังไม่มีข้อมูล</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map((b,i) => {
+    const realIdx = bookings.indexOf(b);
+    return `<tr>
+      <td><span class="booking-id">${b.id}</span></td>
+      <td><div class="guest-name">${b.name}</div><div class="guest-sub">${b.room||''}</div></td>
+      <td><div style="font-size:13px">${b.checkin||'-'}</div><div class="guest-sub">ออก ${b.checkout||'-'}</div></td>
+      <td><strong>${parseInt(b.amount||0).toLocaleString()}</strong></td>
+      <td>${statusBadge(b.status)}</td>
+      <td><div class="actions">${actionBtns(b, realIdx)}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function statusBadge(s) {
+  if(s==='pending') return '<span class="status pending">⏳ รอตรวจ</span>';
+  if(s==='approved') return '<span class="status approved">✅ อนุมัติ</span>';
+  return '<span class="status rejected">✗ ปฏิเสธ</span>';
+}
+
+function actionBtns(b, idx) {
+  let btns = `<button class="btn-sm btn-view" onclick="openModal(${idx})">ดู</button>`;
+  if(b.status==='pending') {
+    btns += `<button class="btn-sm btn-approve" onclick="approve(${idx})">✓ อนุมัติ</button>`;
+    btns += `<button class="btn-sm btn-reject" onclick="reject(${idx})">✗</button>`;
+  } else if(b.status==='approved') {
+    btns += `<button class="btn-sm btn-done">✓ แล้ว</button>`;
+  }
+  return btns;
+}
+
+function filterTable(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderTable(f);
+}
+
+// ====== Modal ======
+function openModal(idx) {
+  const b = bookings[idx];
+  document.getElementById('modal-title').textContent = `${b.id} — ${b.name}`;
+  document.getElementById('modal-body').innerHTML = `
+    <div class="detail-row"><span class="dl">ชื่อลูกค้า</span><span class="dv">${b.name}</span></div>
+    <div class="detail-row"><span class="dl">ห้องพัก</span><span class="dv">${b.room||'-'}</span></div>
+    <div class="detail-row"><span class="dl">เช็คอิน</span><span class="dv">${b.checkin||'-'}</span></div>
+    <div class="detail-row"><span class="dl">เช็คเอาต์</span><span class="dv">${b.checkout||'-'}</span></div>
+    <div class="detail-row"><span class="dl">เบอร์โทร</span><span class="dv">${b.phone||'-'}</span></div>
+    <div class="amount-highlight">
+      <div class="lbl">ยอดที่ต้องชำระ</div>
+      <div class="num">${parseInt(b.amount||0).toLocaleString()} บาท</div>
+    </div>
+    ${b.slipUrl ? `<div style="margin-bottom:14px"><a class="slip-link" href="${b.slipUrl}" target="_blank">🧾 ดูสลิปการโอน</a></div>` : ''}
+    <div class="detail-row"><span class="dl">สถานะ</span><span class="dv">${statusBadge(b.status)}</span></div>
+    <div class="detail-row"><span class="dl">วันที่ส่ง</span><span class="dv">${b.submittedAt||'-'}</span></div>
+    ${b.status==='pending' ? `
+    <div class="modal-actions">
+      <button class="btn-full reject-full" onclick="reject(${idx});closeModal()">✗ ปฏิเสธ</button>
+      <button class="btn-full approve-full" onclick="approve(${idx});closeModal()">✓ อนุมัติ</button>
+    </div>` : ''}
+  `;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function closeModal(e) {
+  if(!e || e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('show');
+}
+
+// ====== Approve / Reject ======
+function approve(idx) {
+  bookings[idx].status = 'approved';
+  save();
+  toast('✅ อนุมัติ ' + bookings[idx].name + ' แล้ว');
+}
+
+function reject(idx) {
+  bookings[idx].status = 'rejected';
+  save();
+  toast('✗ ปฏิเสธ ' + bookings[idx].name);
+}
+
+function save() {
+  localStorage.setItem('hh_bookings', JSON.stringify(bookings));
+  updateStats();
+  renderTable(currentFilter);
+}
+
+// ====== Create Link ======
+function calcAmt() {
+  const t = parseInt(document.getElementById('c-total').value)||0;
+  const d = parseInt(document.getElementById('c-deposit').value)||0;
+  currentAmt = Math.max(0, t-d);
+  document.getElementById('c-amount-display').textContent = currentAmt.toLocaleString() + ' บาท';
+}
+
+function generateLink() {
+  const base = document.getElementById('base-url').value.trim().replace(/\/$/,'') + '/';
+  const id = document.getElementById('c-id').value.trim();
+  const name = document.getElementById('c-name').value.trim();
+  const room = document.getElementById('c-room').value.trim();
+  const checkin = document.getElementById('c-checkin').value;
+  const checkout = document.getElementById('c-checkout').value;
+  const total = document.getElementById('c-total').value;
+  const deposit = document.getElementById('c-deposit').value;
+  const bank = document.getElementById('c-bank').value.trim();
+  const acc = document.getElementById('c-acc').value.trim();
+  const owner = document.getElementById('c-owner').value.trim();
+  if(!id||!name||!currentAmt){alert('กรุณากรอกรหัสจอง ชื่อลูกค้า และยอดชำระให้ครบ');return;}
+  const p = new URLSearchParams({id,name,room,checkin,checkout,total,deposit,amount:currentAmt,bank,acc,owner});
+  genLink = base + '?' + p.toString();
+  document.getElementById('result-url-text').textContent = genLink;
+  document.getElementById('btn-preview-url').href = genLink;
+  document.getElementById('result-box').classList.add('show');
+  document.getElementById('btn-copy-url').textContent = '📋 คัดลอก Link';
+  document.getElementById('btn-copy-url').classList.remove('copied');
+
+  // บันทึก
+  const entry = {id,name,room,checkin,checkout,amount:currentAmt,link:genLink,createdAt:new Date().toLocaleString('th-TH')};
+  links.unshift(entry);
+  if(links.length>20) links.pop();
+  localStorage.setItem('hh_links', JSON.stringify(links));
+
+  // เพิ่มลง bookings ถ้ายังไม่มี
+  if(!bookings.find(b=>b.id===id)) {
+    bookings.unshift({id,name,room,checkin,checkout,amount:currentAmt,status:'pending',phone:'',slipUrl:'',submittedAt:'-'});
+    localStorage.setItem('hh_bookings', JSON.stringify(bookings));
+    updateStats();
+    renderTable(currentFilter);
+  }
+  renderHistory();
+  autoBookingId();
+}
+
+function copyGenLink() {
+  navigator.clipboard.writeText(genLink).then(()=>{
+    const btn = document.getElementById('btn-copy-url');
+    btn.textContent='✅ คัดลอกแล้ว!'; btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='📋 คัดลอก Link';btn.classList.remove('copied');},2000);
+  });
+}
+
+// ====== Edit Link ======
+function openEdit(idx) {
+  editIdx = idx;
+  const l = links[idx];
+  const urlObj = new URL(l.link);
+  const p = urlObj.searchParams;
+  document.getElementById('edit-body').innerHTML = `
+    <div class="edit-field"><label>รหัสจอง</label><input id="e-id" value="${p.get('id')||''}"></div>
+    <div class="edit-field"><label>ชื่อลูกค้า</label><input id="e-name" value="${p.get('name')||''}"></div>
+    <div class="edit-field"><label>ห้องพัก</label><input id="e-room" value="${p.get('room')||''}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="edit-field"><label>วันเช็คอิน</label><input type="date" id="e-checkin" value="${p.get('checkin')||''}"></div>
+      <div class="edit-field"><label>วันเช็คเอาต์</label><input type="date" id="e-checkout" value="${p.get('checkout')||''}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="edit-field"><label>ยอดรวม</label><input type="number" id="e-total" value="${p.get('total')||''}"></div>
+      <div class="edit-field"><label>มัดจำแล้ว</label><input type="number" id="e-deposit" value="${p.get('deposit')||''}"></div>
+    </div>
+    <div class="edit-field"><label>ยอดคงเหลือ</label><input type="number" id="e-amount" value="${p.get('amount')||''}"></div>
+    <div class="edit-field"><label>ธนาคาร</label><input id="e-bank" value="${p.get('bank')||''}"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="edit-field"><label>เลขบัญชี</label><input id="e-acc" value="${p.get('acc')||''}"></div>
+      <div class="edit-field"><label>ชื่อบัญชี</label><input id="e-owner" value="${p.get('owner')||''}"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-full" style="background:var(--accent);color:white" onclick="saveEdit()">💾 บันทึก + คัดลอก Link</button>
+    </div>
+  `;
+  document.getElementById('edit-overlay').classList.add('show');
+}
+
+function saveEdit() {
+  const l = links[editIdx];
+  const urlObj = new URL(l.link);
+  const p = urlObj.searchParams;
+  p.set('id', document.getElementById('e-id').value);
+  p.set('name', document.getElementById('e-name').value);
+  p.set('room', document.getElementById('e-room').value);
+  p.set('checkin', document.getElementById('e-checkin').value);
+  p.set('checkout', document.getElementById('e-checkout').value);
+  p.set('total', document.getElementById('e-total').value);
+  p.set('deposit', document.getElementById('e-deposit').value);
+  p.set('amount', document.getElementById('e-amount').value);
+  p.set('bank', document.getElementById('e-bank').value);
+  p.set('acc', document.getElementById('e-acc').value);
+  p.set('owner', document.getElementById('e-owner').value);
+  links[editIdx].link = urlObj.toString();
+  links[editIdx].name = p.get('name');
+  links[editIdx].amount = p.get('amount');
+  localStorage.setItem('hh_links', JSON.stringify(links));
+  navigator.clipboard.writeText(urlObj.toString()).then(()=>{
+    toast('✅ บันทึกแล้ว! คัดลอก Link แล้ว');
+    closeEdit();
+    renderHistory();
+  });
+}
+
+function closeEdit(e) {
+  if(!e || e.target===document.getElementById('edit-overlay'))
+    document.getElementById('edit-overlay').classList.remove('show');
+}
+
+// ====== History ======
+function renderHistory() {
+  const el = document.getElementById('history-list');
+  if(!links.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px;">ยังไม่มี Link ที่สร้าง</div>';return;}
+  el.innerHTML = links.map((l,i)=>`
+    <div style="padding:12px 0;border-bottom:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+        <div>
+          <span style="font-weight:600;font-size:14px">${l.name}</span>
+          <span style="font-size:11px;color:var(--text-muted);margin-left:6px">${l.room||''}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-sm btn-view" onclick="openEdit(${i})">✏️ แก้ไข</button>
+          <button class="btn-sm btn-approve" onclick="copyHistLink('${l.link.replace(/'/g,'&#39;')}')">📋 คัดลอก</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted)">${l.id||''} · ${l.checkin||''} · <span style="color:var(--accent);font-weight:600">${parseInt(l.amount||0).toLocaleString()} ฿</span> · ${l.createdAt||''}</div>
+    </div>
+  `).join('');
+}
+
+function copyHistLink(link) {
+  navigator.clipboard.writeText(link).then(()=>toast('📋 คัดลอก Link แล้ว!'));
+}
+
+// ====== Toast ======
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
